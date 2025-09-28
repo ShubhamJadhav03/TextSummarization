@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Text Summarizer</title>
+  <style>
+    /* Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 25px;
+      color: #e0e0e0;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      border-radius: 12px;
+      border: none;
+      padding: 15px;
+      font-size: 1rem;
+      outline: none;
+      resize: none;
+      margin-bottom: 20px;
+      font-family: inherit;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    textarea::placeholder {
+      color: #ccc;
+    }
+
+    button {
+      background: #ff6a00;
+      background: linear-gradient(90deg, #ee0979, #ff6a00);
+      border: none;
+      padding: 14px 35px;
+      font-size: 1rem;
+      color: white;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(255, 106, 0, 0.6);
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.15);
+      font-size: 1.1rem;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+
+    .loader {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .loader span {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin: 3px;
+      background: #fff;
+      border-radius: 50%;
+      animation: bounce 0.6s infinite alternate;
+    }
+
+    .loader span:nth-child(2) { animation-delay: 0.2s; }
+    .loader span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      to { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Text Summarizer</h1>
+    <p>Paste your text below and get a concise summary powered by your AI model 🚀</p>
+    <textarea id="inputText" placeholder="Enter text to summarize..."></textarea>
+    <br />
+    <button onclick="summarizeText()">Summarize</button>
+
+    <div class="loader" id="loader">
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="result" id="result" style="display:none;"></div>
+  </div>
+
+  <script>
+  async function summarizeText() {
+    const input = document.getElementById("inputText").value.trim();
+    const resultDiv = document.getElementById("result");
+    const loader = document.getElementById("loader");
+
+    if (!input) {
+      alert("Please enter some text!");
+      return;
+    }
+
+    loader.style.display = "block";
+    resultDiv.style.display = "none";
+    resultDiv.innerText = "";
+
+    try {
+      // Send text as form-data (matching FastAPI Form(...))
+      const formData = new FormData();
+      formData.append("text", input);
+
+      const response = await fetch("http://127.0.0.1:8080/predict", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      loader.style.display = "none";
+      resultDiv.style.display = "block";
+      resultDiv.innerText = data.summary || data.error;
+
+    } catch (err) {
+      loader.style.display = "none";
+      alert("Error: " + err.message);
+    }
+  }
+</script>
+
+</body>
+</html>
+
